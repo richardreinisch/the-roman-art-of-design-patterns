@@ -1,6 +1,6 @@
 # 🏛 The Roman Art of Design Patterns
 
-![The Roman Art of Design Patterns with Imperator Marcus Aurelius](the-roman-art-of-design-patterns.png)
+![The Roman Art of Design Patterns with Imperator Marcus Aurelius](the-roman-art-of-design-patterns.webp)
 
 ### *Codex Architecturae Romanae*
 
