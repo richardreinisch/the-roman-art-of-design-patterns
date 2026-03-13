@@ -2,43 +2,86 @@
 //  PROXY PATTERN — The Imperial Legatus
 //  Run: dotnet script Legatus.cs
 // ============================================================
-using System; using System.Collections.Generic;
+#nullable enable
+using System;
+using System.Collections.Generic;
 
-interface IImperialService { string IssueDecree(string p, string d); string GetCensus(string p); }
+// ── Interface (shared by real service and proxy) ──────────────
+interface IImperialService {
+    string IssueDecree(string province, string decree);
+    string GetCensus(string province);
+}
+
+// ── Real Subject ──────────────────────────────────────────────
 class EmperorHadrian : IImperialService {
-    public EmperorHadrian() { Console.WriteLine("  👑 Emperor Hadrian awakens from his nap!"); }
-    public string IssueDecree(string p, string d) => $"👑 DECREE for {p}: '{d}' — Hadrianus P.P.";
-    public string GetCensus(string p)              => $"👑 Census of {p}: ~50,000 inhabitants";
-}
-class LegateProxy : IImperialService {
-    private EmperorHadrian? _e;
-    private readonly Dictionary<string,string> _cache = new();
-    private readonly HashSet<string> _auth = new HashSet<string>{"Syria","Aegyptus","Britannia","Gallia","Hispania"};
-    private int _count;
-    private EmperorHadrian GetEmperor() {
-        if (_e == null) { Console.WriteLine("  [Proxy] Waking the Emperor..."); _e = new EmperorHadrian(); }
-        return _e;
+    public EmperorHadrian() {
+        Console.WriteLine("  👑 Emperor Hadrian awakens from his nap!");
     }
-    private void Log(string a) => Console.WriteLine($"  [Log #{++_count}] {a}");
-    public string IssueDecree(string p, string d) {
-        Log($"Decree for '{p}'");
-        return _auth.Contains(p) ? GetEmperor().IssueDecree(p, d) : $"🚫 DENIED: '{p}' not authorized!";
-    }
-    public string GetCensus(string p) {
-        Log($"Census for '{p}'");
-        if (_cache.TryGetValue(p, out var r)) { Console.WriteLine($"  [Cache HIT] {p}"); return r; }
-        r = GetEmperor().GetCensus(p); _cache[p] = r; return r;
-    }
-    public int Count => _count;
+    public string IssueDecree(string province, string decree) =>
+        $"👑 DECREE for {province}: '{decree}' — Hadrianus P.P.";
+    public string GetCensus(string province) =>
+        $"👑 Census of {province}: ~50,000 inhabitants";
 }
 
+// ── Proxy (access control + caching + lazy init) ──────────────
+class LegateProxy : IImperialService {
+    private EmperorHadrian? _emperor;
+    private readonly Dictionary<string, string> _cache = new Dictionary<string, string>();
+    private readonly HashSet<string> _authorized;
+    private int _count;
+
+    public LegateProxy() {
+        _authorized = new HashSet<string> { "Syria", "Aegyptus", "Britannia", "Gallia", "Hispania" };
+    }
+
+    private EmperorHadrian GetEmperor() {
+        if (_emperor == null) {
+            Console.WriteLine("  [Proxy] Waking the Emperor...");
+            _emperor = new EmperorHadrian();
+        }
+        return _emperor;
+    }
+
+    private void Log(string action) =>
+        Console.WriteLine($"  [Log #{++_count}] {action}");
+
+    public string IssueDecree(string province, string decree) {
+        Log($"Decree requested for '{province}'");
+        if (!_authorized.Contains(province))
+            return $"🚫 DENIED: '{province}' is not an authorized province!";
+        return GetEmperor().IssueDecree(province, decree);
+    }
+
+    public string GetCensus(string province) {
+        Log($"Census requested for '{province}'");
+        string? cached;
+        if (_cache.TryGetValue(province, out cached)) {
+            Console.WriteLine($"  [Cache HIT] Returning cached census for {province}");
+            return cached;
+        }
+        var result = GetEmperor().GetCensus(province);
+        _cache[province] = result;
+        return result;
+    }
+
+    public int RequestCount => _count;
+}
+
+// ── Demo ──────────────────────────────────────────────────────
 Console.WriteLine("╔═══════════════════════════════════════════════╗");
 Console.WriteLine("║   PROXY PATTERN — C#                          ║");
+Console.WriteLine("║   Legatus Augusti                             ║");
 Console.WriteLine("╚═══════════════════════════════════════════════╝\n");
+
 var proxy = new LegateProxy();
-Console.WriteLine(proxy.IssueDecree("Barbaria","Build roads!"));
-Console.WriteLine(proxy.IssueDecree("Britannia","Build Hadrian's Wall"));
+
+Console.WriteLine("── ACCESS CONTROL ──────────────────────────────────");
+Console.WriteLine(proxy.IssueDecree("Barbaria", "Build roads!"));
+Console.WriteLine(proxy.IssueDecree("Britannia", "Build Hadrian's Wall"));
+
+Console.WriteLine("\n── CACHING PROXY ───────────────────────────────────");
 Console.WriteLine(proxy.GetCensus("Aegyptus"));
-Console.WriteLine(proxy.GetCensus("Aegyptus")); // cache
-Console.WriteLine($"\n  Total: {proxy.Count} requests");
+Console.WriteLine(proxy.GetCensus("Aegyptus")); // second call: cache hit
+
+Console.WriteLine($"\n  Total requests handled: {proxy.RequestCount}");
 Console.WriteLine("\"Legatus vocem imperatoris habet!\"");
