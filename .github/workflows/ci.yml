@@ -1,0 +1,126 @@
+name: 🏛 Roman Patterns CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-cpp:
+    name: ⚔ C++ (g++ 17)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile & run all C++ patterns
+        run: |
+          PASS=0; FAIL=0
+          for cpp in patterns/*/cpp/*.cpp; do
+            tgt="${cpp%.cpp}"
+            if g++ -std=c++17 -Wall -pthread -o "$tgt" "$cpp" && "$tgt" > /dev/null; then
+              echo "✅ $cpp"; PASS=$((PASS+1))
+            else echo "❌ $cpp"; FAIL=$((FAIL+1)); fi
+          done
+          echo "C++: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-python:
+    name: 🐍 Python 3.11
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Run all Python patterns
+        run: |
+          PASS=0; FAIL=0
+          for f in patterns/*/python/*.py; do
+            if python3 "$f" > /dev/null; then echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+          done
+          echo "Python: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-php:
+    name: 🐘 PHP 8.2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.2' }
+      - name: Run all PHP patterns
+        run: |
+          PASS=0; FAIL=0
+          for f in patterns/*/php/*.php; do
+            if php "$f" > /dev/null; then echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+          done
+          echo "PHP: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-java:
+    name: ☕ Java 21
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+      - name: Run all Java patterns (single-file launch)
+        run: |
+          PASS=0; FAIL=0
+          for f in patterns/*/java/*.java; do
+            if java "$f" > /dev/null; then echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+          done
+          echo "Java: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-typescript:
+    name: 🔷 TypeScript 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g typescript
+      - name: Compile & run all TypeScript patterns
+        run: |
+          PASS=0; FAIL=0
+          for f in patterns/*/typescript/*.ts; do
+            js="${f%.ts}.js"
+            if tsc --module commonjs --target ES2022 --strict "$f" 2>/dev/null && node "$js" > /dev/null; then
+              echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+            rm -f "$js"
+          done
+          echo "TypeScript: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-javascript:
+    name: 🟨 JavaScript (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Run all JavaScript patterns
+        run: |
+          PASS=0; FAIL=0
+          for f in patterns/*/javascript/*.js; do
+            if node "$f" > /dev/null; then echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+          done
+          echo "JavaScript: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
+
+  test-csharp:
+    name: 💜 C# (.NET 8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+      - run: dotnet tool install -g dotnet-script
+      - name: Run all C# patterns
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          PASS=0; FAIL=0
+          for f in patterns/*/csharp/*.cs; do
+            if dotnet script "$f" > /dev/null 2>&1; then echo "✅ $f"; PASS=$((PASS+1))
+            else echo "❌ $f"; FAIL=$((FAIL+1)); fi
+          done
+          echo "C#: $PASS/$((PASS+FAIL))"; [ $FAIL -eq 0 ]
