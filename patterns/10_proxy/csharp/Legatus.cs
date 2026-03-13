@@ -13,7 +13,7 @@ class EmperorHadrian : IImperialService {
 class LegateProxy : IImperialService {
     private EmperorHadrian? _e;
     private readonly Dictionary<string,string> _cache = new();
-    private readonly HashSet<string> _auth = new(){"Syria","Aegyptus","Britannia","Gallia","Hispania"};
+    private readonly HashSet<string> _auth = new HashSet<string>{"Syria","Aegyptus","Britannia","Gallia","Hispania"};
     private int _count;
     private EmperorHadrian GetEmperor() {
         if (_e == null) { Console.WriteLine("  [Proxy] Waking the Emperor..."); _e = new EmperorHadrian(); }

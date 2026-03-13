@@ -22,7 +22,7 @@ class CenturionService {
     public string PromoteBest(string legion) {
         var all = _r.FindByLegion(legion);
         if (!all.Any()) return $"No centurions in {legion}";
-        var best = all.MaxBy(c => c.BattlesWon)!;
+        var best = all.OrderByDescending(c => c.BattlesWon).First();
         _r.Save(best with { Rank = "Primus Pilus" });
         return $"🎖  {best.Name} promoted! ({best.BattlesWon} battles)";
     }
