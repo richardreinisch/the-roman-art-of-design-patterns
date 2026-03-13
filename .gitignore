@@ -1,0 +1,103 @@
+# ============================================================
+#  THE ROMAN ART OF DESIGN PATTERNS — .gitignore
+#  "Quod non committitur, non corrumpitur"
+#  (What is not committed, cannot be corrupted)
+# ============================================================
+
+
+# ─── C++ ─────────────────────────────────────────────────
+# Compiled binaries (same name as .cpp file, no extension)
+patterns/*/cpp/aerarium
+patterns/*/cpp/fabrica
+patterns/*/cpp/speculae
+patterns/*/cpp/triumphator
+patterns/*/cpp/interpres
+patterns/*/cpp/officium
+patterns/*/cpp/mandatum
+patterns/*/cpp/ars_bellica
+patterns/*/cpp/tabularium
+patterns/*/cpp/legatus
+patterns/*/cpp/res_publica
+patterns/*/cpp/consules
+
+# Object files and generic build output
+*.o
+*.out
+*.a
+*.so
+
+
+# ─── TYPESCRIPT ──────────────────────────────────────────
+# Transpiled JS files sitting next to their .ts sources
+patterns/*/typescript/*.js
+patterns/*/typescript/*.js.map
+patterns/*/typescript/*.d.ts
+
+# tsc incremental build cache
+*.tsbuildinfo
+
+
+# ─── PYTHON ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+
+# ─── JAVA ────────────────────────────────────────────────
+# javac output (not used — we run via `java File.java` directly,
+# but ignore in case someone compiles manually)
+*.class
+*.jar
+out/
+target/
+
+
+# ─── C# / .NET ───────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.csproj
+*.sln
+project.assets.json
+.dotnet/
+
+
+# ─── PHP ─────────────────────────────────────────────────
+vendor/
+composer.lock
+
+
+# ─── NODE / JAVASCRIPT ───────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+dist/
+
+
+# ─── EDITORS & OS ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+
+# ─── MISC ────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+
+
+# ─── IDE ────────────────────────────────────────────────
+.idea
+
+# ─── VARIOUS ────────────────────────────────────────────────
+SETUP.md
