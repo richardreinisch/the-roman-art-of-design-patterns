@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Roman Art of Design Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:    #c9a84c;
+    --gold-lt: #e8c96e;
+    --gold-dk: #8b6914;
+    --stone:   #1a1610;
+    --stone2:  #2a2318;
+    --stone3:  #342d1f;
+    --parch:   #f5ead0;
+    --parch2:  #ede0c0;
+    --red:     #8b1a1a;
+    --cream:   #faf5e8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--stone);
+    color: var(--parch);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.35;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #3a2d1000 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, #8b691422 0%, transparent 60%);
+    border-bottom: 1px solid #c9a84c33;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 39px,
+        #c9a84c09 39px,
+        #c9a84c09 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 79px,
+        #c9a84c06 79px,
+        #c9a84c06 80px
+      );
+  }
+
+  .eagle {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    animation: descend 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.3s both;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    color: var(--cream);
+    text-shadow: 0 2px 40px #c9a84c44;
+    margin-bottom: 0.5rem;
+    animation: fadeUp 0.8s 0.4s both;
+  }
+
+  .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s 0.5s both;
+  }
+
+  .tagline {
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--parch2);
+    max-width: 560px;
+    margin: 0 auto 3rem;
+    animation: fadeUp 0.8s 0.6s both;
+  }
+
+  .badges {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.8s 0.7s both;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    padding: 0.3em 0.9em;
+    border: 1px solid #c9a84c55;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-lt);
+    background: #c9a84c11;
+    transition: all 0.2s;
+  }
+  .badge:hover { background: #c9a84c22; border-color: var(--gold); }
+
+  .cta-row {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s 0.8s both;
+  }
+
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.8em 2em;
+    border: 1px solid var(--gold);
+    text-decoration: none;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--stone);
+  }
+  .btn-primary:hover { background: var(--gold-lt); border-color: var(--gold-lt); }
+  .btn-ghost { color: var(--gold); background: transparent; }
+  .btn-ghost:hover { background: #c9a84c18; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex; align-items: center; gap: 1.5rem;
+    max-width: 700px; margin: 0 auto;
+    padding: 3rem 2rem 0;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dk), transparent);
+  }
+
+  /* ── PATTERNS GRID ── */
+  .section {
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    color: var(--cream);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  .section-sub {
+    text-align: center;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 3rem;
+    font-size: 1rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    position: relative;
+    background: var(--stone2);
+    border: 1px solid #c9a84c28;
+    padding: 1.8rem;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: default;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dk), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover {
+    border-color: #c9a84c66;
+    transform: translateY(-3px);
+    background: var(--stone3);
+    box-shadow: 0 12px 40px #00000060, 0 0 60px #c9a84c08;
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--gold-dk);
+    margin-bottom: 0.4rem;
+  }
+  .card-icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.3rem;
+  }
+
+  .card-latin {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+  }
+
+  .card-desc {
+    font-size: 0.9rem;
+    color: var(--parch2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .tag {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.2em 0.6em;
+    border: 1px solid #c9a84c33;
+    color: var(--gold-dk);
+    border-radius: 1px;
+  }
+
+  .category-label {
+    position: absolute; top: 1.8rem; right: 1.8rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dk);
+    text-transform: uppercase;
+  }
+
+  /* ── LANGUAGES STRIP ── */
+  .langs {
+    position: relative; z-index: 1;
+    background: var(--stone2);
+    border-top: 1px solid #c9a84c22;
+    border-bottom: 1px solid #c9a84c22;
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+  .langs-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .lang-row {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem 3rem;
+  }
+  .lang-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    transition: transform 0.2s;
+  }
+  .lang-item:hover { transform: translateY(-3px); }
+  .lang-icon { font-size: 2rem; }
+  .lang-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-lt);
+  }
+  .lang-ver {
+    font-size: 0.7rem;
+    color: var(--gold-dk);
+    font-style: italic;
+  }
+
+  /* ── QUOTE SECTION ── */
+  .quote-section {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 5rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .ornament { color: var(--gold); font-size: 3rem; line-height: 1; opacity: 0.4; }
+  blockquote {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.5;
+    margin: 1rem 0;
+  }
+  .quote-attr {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-top: 1rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    background: #0d0b08;
+    border-top: 1px solid #c9a84c22;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .footer-links {
+    display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dk);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--gold-lt); }
+  .footer-copy {
+    font-size: 0.8rem;
+    color: #5a4f38;
+    font-style: italic;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes descend {
+    from { opacity: 0; transform: translateY(-30px) scale(0.8); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="eagle">🦅</div>
+  <p class="hero-eyebrow">SPQR · Senatus Populusque Romanus Programmandi</p>
+  <h1>The Roman Art of<br>Design Patterns</h1>
+  <p class="subtitle">Codex Architecturae Romanae</p>
+  <p class="tagline">"Omnes vias ad codicem bonum ducunt" — All roads lead to good code</p>
+
+  <div class="badges">
+    <span class="badge">⚔ C++17</span>
+    <span class="badge">🐍 Python 3</span>
+    <span class="badge">🐘 PHP 8</span>
+    <span class="badge">☕ Java 21</span>
+    <span class="badge">🔷 TypeScript 5</span>
+    <span class="badge">🟨 JavaScript ES2022</span>
+    <span class="badge">💜 C# .NET 8</span>
+  </div>
+
+  <div class="cta-row">
+    <a href="https://github.com/richardreinisch/the-roman-art-of-design-patterns" class="btn btn-primary">📜 View on GitHub</a>
+    <a href="#patterns" class="btn btn-ghost">Explore Patterns ↓</a>
+  </div>
+</header>
+
+<!-- ── LANGUAGES ─────────────────────────────────────────── -->
+<div class="langs">
+  <p class="langs-title">Implemented in 7 Languages · 84 Files · Zero Dependencies</p>
+  <div class="lang-row">
+    <div class="lang-item"><span class="lang-icon">⚔</span><span class="lang-name">C++</span><span class="lang-ver">C++17</span></div>
+    <div class="lang-item"><span class="lang-icon">🐍</span><span class="lang-name">Python</span><span class="lang-ver">3.10+</span></div>
+    <div class="lang-item"><span class="lang-icon">🐘</span><span class="lang-name">PHP</span><span class="lang-ver">8.1+</span></div>
+    <div class="lang-item"><span class="lang-icon">☕</span><span class="lang-name">Java</span><span class="lang-ver">21 (single-file)</span></div>
+    <div class="lang-item"><span class="lang-icon">🔷</span><span class="lang-name">TypeScript</span><span class="lang-ver">5.0+</span></div>
+    <div class="lang-item"><span class="lang-icon">🟨</span><span class="lang-name">JavaScript</span><span class="lang-ver">ES2022</span></div>
+    <div class="lang-item"><span class="lang-icon">💜</span><span class="lang-name">C#</span><span class="lang-ver">.NET 8</span></div>
+  </div>
+</div>
+
+<!-- ── PATTERNS GRID ──────────────────────────────────────── -->
+<main id="patterns" class="section">
+  <div class="divider">XII Patterns</div>
+  <br>
+  <h2 class="section-title">The Twelve Patterns</h2>
+  <p class="section-sub">Each explained through the lens of ancient Roman life</p>
+
+  <div class="grid">
+
+    <div class="card reveal">
+      <span class="category-label">Creational</span>
+      <div class="card-num">PATTERN I</div>
+      <div class="card-icon">🏛</div>
+      <div class="card-title">Singleton</div>
+      <div class="card-latin">Unus et idem — One and the same</div>
+      <div class="card-desc">The Imperial Treasury. There is exactly ONE Aerarium Saturni for all of Rome. Caesar and Cicero both queue at the same single vault.</div>
+      <div class="card-tags"><span class="tag">Connection Pool</span><span class="tag">Logger</span><span class="tag">Config</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Creational</span>
+      <div class="card-num">PATTERN II</div>
+      <div class="card-icon">⚒</div>
+      <div class="card-title">Factory Method</div>
+      <div class="card-latin">Fabrica dat, miles accipit</div>
+      <div class="card-desc">The Imperial Weaponry Workshop. The General orders weapons without knowing how they're forged. Each Fabrica specialises — sword, ballista, pilum.</div>
+      <div class="card-tags"><span class="tag">Plugin System</span><span class="tag">DB Drivers</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Behavioral</span>
+      <div class="card-num">PATTERN III</div>
+      <div class="card-icon">👁</div>
+      <div class="card-title">Observer</div>
+      <div class="card-latin">Una specula ardet, omnes vident</div>
+      <div class="card-desc">Rome's fire-signal network. One tower lights a beacon — instantly every subscribed observer reacts. No polling. No couriers.</div>
+      <div class="card-tags"><span class="tag">Events</span><span class="tag">Pub/Sub</span><span class="tag">MVC</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Structural</span>
+      <div class="card-num">PATTERN IV</div>
+      <div class="card-icon">🎭</div>
+      <div class="card-title">Decorator</div>
+      <div class="card-latin">Miles ornatur, non mutatur</div>
+      <div class="card-desc">The Triumphator's dressing room. Same soldier — new capabilities layered on dynamically. Armour, helmet, cloak, laurel wreath. In any order.</div>
+      <div class="card-tags"><span class="tag">Middleware</span><span class="tag">Wrapping</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Structural</span>
+      <div class="card-num">PATTERN V</div>
+      <div class="card-icon">🔗</div>
+      <div class="card-title">Adapter</div>
+      <div class="card-latin">Interpres pontem verborum aedificat</div>
+      <div class="card-desc">The Roman Interpreter. A Gaul speaks Celtic, Rome speaks Latin. The Interpres stands between them — translating without either party changing.</div>
+      <div class="card-tags"><span class="tag">Legacy Code</span><span class="tag">ODBC</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Architectural</span>
+      <div class="card-num">PATTERN VI</div>
+      <div class="card-icon">💉</div>
+      <div class="card-title">Dependency Injection</div>
+      <div class="card-latin">Non ipse quaerit, accipit</div>
+      <div class="card-desc">The Praetorian Quartermaster. Caesar doesn't forge his own sword. The Praefectus assembles everything and delivers it. Swap the messenger — Caesar never notices.</div>
+      <div class="card-tags"><span class="tag">Testing</span><span class="tag">IoC</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Behavioral</span>
+      <div class="card-num">PATTERN VII</div>
+      <div class="card-icon">📜</div>
+      <div class="card-title">Command</div>
+      <div class="card-latin">Mandatum datum, mandatum executum</div>
+      <div class="card-desc">Imperial orders sealed in wax. Written, queued, executed, reversed, replayed. Every command is an object. Vespasian orders the Colosseum — then changes his mind.</div>
+      <div class="card-tags"><span class="tag">Undo/Redo</span><span class="tag">Queue</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Behavioral</span>
+      <div class="card-num">PATTERN VIII</div>
+      <div class="card-icon">⚔</div>
+      <div class="card-title">Strategy</div>
+      <div class="card-latin">Non una via vincimus</div>
+      <div class="card-desc">Roman battle formations. Testudo, Cuneus, Orbis. The legion doesn't change — the strategy swaps at runtime based on battlefield conditions.</div>
+      <div class="card-tags"><span class="tag">Algorithms</span><span class="tag">Auth</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Enterprise</span>
+      <div class="card-num">PATTERN IX</div>
+      <div class="card-icon">📚</div>
+      <div class="card-title">Repository</div>
+      <div class="card-latin">Ubi data est? Tabularius scit</div>
+      <div class="card-desc">Rome's state archive on the Capitoline Hill. The Senate never digs through tablets themselves. They ask the Tabularius — who always knows where everything is.</div>
+      <div class="card-tags"><span class="tag">DDD</span><span class="tag">Data Access</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Structural</span>
+      <div class="card-num">PATTERN X</div>
+      <div class="card-icon">🛡</div>
+      <div class="card-title">Proxy</div>
+      <div class="card-latin">Legatus vocem imperatoris habet</div>
+      <div class="card-desc">The Imperial Legatus. Hadrian can't answer every petition. His legates speak with imperial authority — adding access control, caching, and logging.</div>
+      <div class="card-tags"><span class="tag">Cache</span><span class="tag">Auth</span><span class="tag">Lazy Init</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Architectural</span>
+      <div class="card-num">PATTERN XI</div>
+      <div class="card-icon">🏰</div>
+      <div class="card-title">MVC / MVCS</div>
+      <div class="card-latin">Divide et impera</div>
+      <div class="card-desc">The Roman Republic. Lex (Model), Contio (View), Senate (Controller), Quaestores (Service). Separation of powers — the original software architecture, 500 BCE.</div>
+      <div class="card-tags"><span class="tag">Web Apps</span><span class="tag">Rails</span><span class="tag">Django</span></div>
+    </div>
+
+    <div class="card reveal">
+      <span class="category-label">Enterprise</span>
+      <div class="card-num">PATTERN XII</div>
+      <div class="card-icon">⚖</div>
+      <div class="card-title">CQRS</div>
+      <div class="card-latin">Qui legit non scribit; qui scribit non legit</div>
+      <div class="card-desc">The Two Consuls. One reads. One writes. They never swap roles. Each optimised for their duty — the write side captures every event, the read side serves fast queries.</div>
+      <div class="card-tags"><span class="tag">Event Sourcing</span><span class="tag">Scale</span></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── QUOTE ──────────────────────────────────────────────── -->
+<div class="quote-section">
+  <div class="ornament">❧</div>
+  <blockquote>"The Roman Empire lasted 500 years because it separated concerns.<br>Your monolith won't last 5."</blockquote>
+  <p class="quote-attr">— Senior Architect, probably</p>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">🦅 SPQR</div>
+  <div class="footer-links">
+    <a href="https://github.com/richardreinisch/the-roman-art-of-design-patterns">GitHub</a>
+    <a href="https://github.com/richardreinisch/the-roman-art-of-design-patterns/blob/main/README.md">Documentation</a>
+    <a href="https://github.com/richardreinisch/the-roman-art-of-design-patterns/blob/main/SETUP.md">Setup Guide</a>
+    <a href="https://github.com/richardreinisch/the-roman-art-of-design-patterns/blob/main/LICENSE">License</a>
+  </div>
+  <p class="footer-copy">MIT License · "Liber et gratis, sicut aqua Romana" · Free and open, like Roman aqueduct water.</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 4) * 80}ms`;
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
